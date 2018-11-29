@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <p>On load this page will create a simple JSON string from a JS object, it will create a blob of type application/json based on the string.</p>
+    <p>The following link can then be used to trigger "download" of the file, which really just means copy/write from blob in memory to location specified by the user (or default download location if the browser is configured to simply download)</p>
+    <p>Using this an SPA can avoid having to use a server side component to allow the user to download a file with content that has been generated in browser.</p>
+    <a id="downloadLink" href="#">example.json</a>
+    <script>
+      var fileName = 'example.json';
+      var fileType = 'application/json';
+
+      var obj = new Object();
+      obj.test = 1234;
+      obj.blah = 'asdf';
+
+      var jsonString = JSON.stringify(obj);
+
+      var blob = new Blob([jsonString], { type: fileType });
+
+      var anchor = document.getElementById('downloadLink');
+
+      anchor.download = fileName;
+
+      if (window.navigator && window.navigator.msSaveOrOpenBlob && ! window.navigator.userAgent.indexOf('Edge/')) {
+        // IE support with exclusion for Edge as Edge sucks slightly less than IE.
+        anchor.onclick = function () { window.navigator.msSaveOrOpenBlob(blob, fileName) };
+      } else {
+        // Chrome, Edge, Firefox etc - any other up to date modern browser should work with the below
+        // Use (window.webkitURL || window.URL).createObjectURL(blob) if you need to support webKitURL for some reason.
+        anchor.href = window.URL.createObjectURL(blob);
+        anchor.dataset.downloadUrl = [ fileType, anchor.download, anchor.href].join(':');
+      }
+    </script>
+  </body>
+</html>
